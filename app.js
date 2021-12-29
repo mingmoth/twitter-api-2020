@@ -21,6 +21,10 @@ app.use((req, res, next) => {
   next()
 })
 
+// setup passport
+app.use(passport.initialize())
+app.use(passport.session())
+
 // use helpers.getUser(req) to replace req.user
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
