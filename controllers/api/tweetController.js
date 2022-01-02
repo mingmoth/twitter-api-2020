@@ -1,5 +1,5 @@
 const db = require('../../models')
-const Restaurant = db.Restaurant
+const Tweet = db.Tweet
 
 const tweetService = require('../../services/tweetService')
 
