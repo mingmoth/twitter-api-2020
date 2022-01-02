@@ -1,7 +1,9 @@
 const express = require('express')
 const router = express.Router()
+const passport = require('../config/passport')
 
 const userController = require('../controllers/api/userController')
+const tweetController = require('../controllers/api/tweetController')
 
 const authenticated = passport.authenticate('jwt', { session: false })
 
@@ -33,9 +35,9 @@ router.get('/users/:id/followers')
 router.put('/users/:id')
 
 // tweet
-router.get('/tweets')
+router.get('/tweets', authenticated, tweetController.getTweets)
 
-router.post('/tweets')
+router.post('/tweets', authenticated, tweetController.createTweet)
 
 // reply
 router.post('/tweets/:tweet_id/replies')
