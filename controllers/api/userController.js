@@ -63,7 +63,30 @@ let userController = {
         })
       }
     })
-  }
+  },
+  // get currentUser
+
+  // get one user
+
+  // get one user's tweets
+  
+  // get one user's replies
+
+  // get one user's liked tweets
+
+  // get one user's followings
+
+  // get one user's followers
+
+  // like one tweet
+
+  // cancel like from tweet
+
+  // follow one user
+
+  // unfollow one user
+
+  // get top follows users
 }
 
 module.exports = userController
