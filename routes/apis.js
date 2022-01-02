@@ -39,6 +39,8 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 
 router.post('/tweets', authenticated, tweetController.createTweet)
 
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
+
 // reply
 router.post('/tweets/:tweet_id/replies')
 

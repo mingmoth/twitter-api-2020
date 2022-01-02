@@ -11,7 +11,11 @@ const tweetController = {
     })
   },
   // get one tweet
-
+  getTweet: (req, res) => {
+    tweetService.getTweet(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   // create new tweet
   createTweet: (req, res) => {
     tweetService.createTweet(req, res, (data) => {
