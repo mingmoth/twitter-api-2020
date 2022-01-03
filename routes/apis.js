@@ -53,9 +53,9 @@ router.post('/tweets/:id/like', authenticated, userController.addLike)
 router.post('/tweets/:id/unlike', authenticated, userController.removeLike)
 
 // followship
-router.post('/followships')
+router.post('/followships', authenticated, userController.addFollow)
 
-router.delete('/followships/:followingId')
+router.delete('/followships/:followingId', authenticated, userController.removeFollow)
 
 // admin
 router.get('/admin/users')

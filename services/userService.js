@@ -78,11 +78,44 @@ const userService = {
         })
       }
     })
-  }
+  },
   // follow one user
-
+  addFollow: (req, res, callback) => {
+    if(Number(req.body.UserId) === Number(helper.getUser(req).id)) {
+      return callback({ status: 'error', message: '無法追蹤自己(當前使用者)' })
+    }
+    Followship.findOne({
+      where: { followingId: req.body.UserId, followerId: helper.getUser(req).id }
+    }).then(follow => {
+      if(follow) {
+        return callback({ status: 'error', message: '已追蹤此使用者' })
+      } else {
+        Followship.create({
+          followingId: req.body.UserId,
+          followerId: helper.getUser(req).id
+        }).then(follow => {
+          return callback({ status: 'success', message: '成功追蹤此使用者'})
+        })
+      }
+    })
+  },
   // unfollow one user
-
+  removeFollow: (req, res, callback) => {
+    let followingId = req.params.followingId
+    let followerId = helper.getUser(req).id
+    if (Number(followerId) === Number(followingId)) return callback({ status: 'error', message: '無法取消追蹤自己(當前使用者)' })
+    Followship.findOne({
+      where: { followingId: followingId, followerId: followerId }
+    }).then(follow => {
+      if(!follow) {
+        return callback({ status: 'error', message: '尚未追蹤此使用者'})
+      } else {
+        follow.destroy().then(follow => {
+          return callback({ status: 'success', message: '成功取消追蹤此使用者'})
+        })
+      }
+    })
+  }
   // get top follows users
 }
 
