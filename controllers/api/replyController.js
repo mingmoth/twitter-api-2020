@@ -5,6 +5,11 @@ const replyService = require('../../services/replyService')
 
 const replyController = {
   // create new reply
+  createReply: (req, res) => {
+    replyService.createReply(req, res, (data) => {
+      return res.json(data)
+    })
+  }
 }
 
 module.exports = replyController
