@@ -31,7 +31,7 @@ router.get('/users/:id/replied_tweets', authenticated, userController.getUserRep
 
 router.get('/users/:id/likes', authenticated, userController.getUserLike)
 
-router.get('/users/:id/followings')
+router.get('/users/:id/followings', authenticated, userController.getFollowing)
 
 router.get('/users/:id/followers')
 

@@ -114,7 +114,19 @@ const userService = {
     }).catch(error => { return callback({ status: 'error', message: '無法取得使用者按讚資訊，請稍後再試' }) })
   },
   // get one user's followings
-  
+  getFollowing: (req, res, callback) => {
+    User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followings' }]
+    }).then(users => {
+      users = users.Followings.map(user => ({
+        ...user.dataValues,
+        isFollowed: user.Followship.followerId === Number(req.params.id),
+      }))
+      return callback({ users: users })
+    }).catch(error => {
+      return callback({ status: 'error', message: '無法取得此使用者追蹤對象'})
+    })
+  },
   // get one user's followers
 
   // like one tweet
