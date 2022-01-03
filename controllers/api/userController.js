@@ -76,9 +76,12 @@ let userController = {
       return res.json(data)
     })
   },
-
   // get one user's tweets
-  
+  getUserTweet: (req, res) => {
+    userService.getUserTweet(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   // get one user's replies
 
   // get one user's liked tweets

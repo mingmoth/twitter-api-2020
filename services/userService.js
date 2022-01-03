@@ -3,6 +3,7 @@ const helper = require('../_helpers')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
 
@@ -43,10 +44,10 @@ const userService = {
     try {
       await User.findByPk(helper.getUser(req).id 
       ).then(user => {
-        // user = {
-        //   ...user,
-        //   password: ''
-        // }
+        user = ({
+          ...user.dataValues,
+          password: ''
+        })
         return callback({ user: user })
       })
     } catch (error) {
@@ -55,13 +56,6 @@ const userService = {
   },
   // get one user
   getUser: async (req, res, callback) => {
-    // User.findByPk(req.params.id).then(user => {
-    //   // user = {
-    //   //   ...user,
-    //   //   password: ''
-    //   // }
-    //   return callback({ user: user })
-    // })
     try {
       await User.findByPk(req.params.id, {
         include: [
@@ -69,10 +63,10 @@ const userService = {
           { model: User, as: 'Followings' }
         ]
       }).then(user => {
-        // user = {
-        //   ...user,
-        //   password: ''
-        // }
+        user = ({
+          ...user.dataValues,
+          password: ''
+        })
         return callback({ user: user })
       })
     } catch (error) {
@@ -80,7 +74,23 @@ const userService = {
     }
   },
   // get one user's tweets
-  
+  getUserTweet: (req, res, callback) => {
+    Tweet.findAll({
+      where: { UserId: req.params.id},
+      include: [User, Reply, Like]
+    }).then(tweets => {
+      tweets = tweets.map(tweet => {
+        return tweet = {
+          ...tweet.dataValues,
+          Replies: tweet.Replies.length,
+          Likes: tweet.Likes.length
+        }
+      })
+      return callback({ tweets: tweets })
+    }).catch(error => {
+      return callback({ status: 'error', message: '無法取得使用者推文資訊，請稍後再試' })
+    })
+  },
   // get one user's replies
 
   // get one user's liked tweets
