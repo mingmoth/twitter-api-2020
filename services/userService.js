@@ -92,7 +92,13 @@ const userService = {
     })
   },
   // get one user's replies
-
+  getUserReply: (req, res, callback) => {
+    Tweet.findAll({
+      include: [{ model: Reply, where: { UserId: req.params.id } }, User]
+    }).then(tweets => {
+      return callback({ tweets: tweets })
+    }).catch(error => { return callback({ status: 'error', message: '無法取得使用者回復資訊，請稍後再試' }) })
+  },
   // get one user's liked tweets
   getUserLike: (req, res, callback) => {
     Like.findAll({
@@ -105,10 +111,10 @@ const userService = {
         }
       })
       return callback({ likes: likes })
-    }).catch(error => { return callback({status: 'error', message: '無法取得使用者按讚資訊，請稍後再試'}) })
+    }).catch(error => { return callback({ status: 'error', message: '無法取得使用者按讚資訊，請稍後再試' }) })
   },
   // get one user's followings
-
+  
   // get one user's followers
 
   // like one tweet
