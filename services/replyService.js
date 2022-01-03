@@ -13,6 +13,16 @@ const replyService = {
     }).then(reply => {
       return callback({status: 'success', message: '成功新增推文回覆'})
     })
+  },
+  // get replies
+  getReply: (req, res, callback) => {
+    Reply.findAll({
+      where: { TweetId: req.params.tweet_id },
+      raw: true,
+      nest: true
+    }).then(replies => {
+      return callback({ replies: replies })
+    })
   }
 }
 

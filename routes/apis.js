@@ -45,7 +45,7 @@ router.get('/tweets/:id', authenticated, tweetController.getTweet)
 // reply
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.createReply)
 
-router.get('//tweets/:tweet_id/replies')
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 
 // like
 router.post('/tweets/:id/like')

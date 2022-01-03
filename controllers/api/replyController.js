@@ -9,6 +9,12 @@ const replyController = {
     replyService.createReply(req, res, (data) => {
       return res.json(data)
     })
+  },
+  // get replies
+  getReply: (req, res) => {
+    replyService.getReply(req, res, (data) => {
+      return res.json(data)
+    })
   }
 }
 
