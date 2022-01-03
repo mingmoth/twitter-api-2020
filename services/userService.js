@@ -94,7 +94,19 @@ const userService = {
   // get one user's replies
 
   // get one user's liked tweets
-
+  getUserLike: (req, res, callback) => {
+    Like.findAll({
+      where: { UserId: req.params.id },
+      include: [{ model: Tweet, include: [User]}]
+    }).then(likes => {
+      likes = likes.map(like => {
+        return like = {
+          ...like.Tweet.dataValues,
+        }
+      })
+      return callback({ likes: likes })
+    }).catch(error => { return callback({status: 'error', message: '無法取得使用者按讚資訊，請稍後再試'}) })
+  },
   // get one user's followings
 
   // get one user's followers

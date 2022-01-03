@@ -29,7 +29,7 @@ router.get('/users/:id/tweets', authenticated, userController.getUserTweet)
 
 router.get('/users/:id/replied_tweets')
 
-router.get('/users/:id/likes')
+router.get('/users/:id/likes', authenticated, userController.getUserLike)
 
 router.get('/users/:id/followings')
 
