@@ -65,8 +65,17 @@ let userController = {
     })
   },
   // get currentUser
-
+  getCurrentUser: (req, res) => {
+    userService.getCurrentUser(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   // get one user
+  getUser: (req, res) => {
+    userService.getUser(req, res, (data) => {
+      return res.json(data)
+    })
+  },
 
   // get one user's tweets
   

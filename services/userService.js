@@ -39,9 +39,46 @@ const userService = {
     })
   },
   // get currentUser
-
+  getCurrentUser: async (req, res, callback) => {
+    try {
+      await User.findByPk(helper.getUser(req).id 
+      ).then(user => {
+        // user = {
+        //   ...user,
+        //   password: ''
+        // }
+        return callback({ user: user })
+      })
+    } catch (error) {
+      return callback({ status: 'error', message: '無法取得當前使用者資訊'})
+    }
+  },
   // get one user
-
+  getUser: async (req, res, callback) => {
+    // User.findByPk(req.params.id).then(user => {
+    //   // user = {
+    //   //   ...user,
+    //   //   password: ''
+    //   // }
+    //   return callback({ user: user })
+    // })
+    try {
+      await User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      }).then(user => {
+        // user = {
+        //   ...user,
+        //   password: ''
+        // }
+        return callback({ user: user })
+      })
+    } catch (error) {
+      return callback({ status: 'error', message: '無法取使用者資訊' })
+    }
+  },
   // get one user's tweets
   
   // get one user's replies
