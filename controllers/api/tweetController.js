@@ -22,9 +22,6 @@ const tweetController = {
       return res.json(data)
     })
   }
-  // like one tweet
-
-  // cancel like from tweet
 }
 
 module.exports = tweetController

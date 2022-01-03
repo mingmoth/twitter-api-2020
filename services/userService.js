@@ -1,6 +1,10 @@
 const bcrypt = require('bcryptjs')
+const helper = require('../_helpers')
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
+const Like = db.Like
+const Followship = db.Followship
 
 const userService = {
   signUp: (req, res, callback) => {
@@ -33,7 +37,7 @@ const userService = {
         })
       }
     })
-  }
+  },
   // get currentUser
 
   // get one user
@@ -49,9 +53,32 @@ const userService = {
   // get one user's followers
 
   // like one tweet
-
+  addLike: (req, res, callback) => {
+    Like.findOne({ where: { TweetId: req.params.id, UserId: helper.getUser(req).id } }).then(like => {
+      if(like) {
+        return callback({ status: 'error', message: '此篇推文已按讚' })
+      } else {
+        Like.create({
+          TweetId: req.params.id,
+          UserId: helper.getUser(req).id
+        }).then(like => {
+          return callback({ status: 'success', message: '成功對推文按讚'})
+        })
+      }
+    })
+  },
   // cancel like from tweet
-
+  removeLike: (req, res, callback) => {
+    Like.findOne({ where: { TweetId: req.params.id, UserId: helper.getUser(req).id } }).then(like => {
+      if(!like) {
+        return callback({ status: 'error', message: '未對此篇推文按讚，無法取消讚' })
+      } else {
+        like.destroy().then(like => {
+          return callback({ status: 'success', message: '成功對推文取消讚' })
+        })
+      }
+    })
+  }
   // follow one user
 
   // unfollow one user

@@ -79,9 +79,17 @@ let userController = {
   // get one user's followers
 
   // like one tweet
-
+  addLike: (req, res) => {
+    userService.addLike(req, res, (data) => {
+      res.json(data)
+    })
+  },
   // cancel like from tweet
-
+  removeLike: (req, res) => {
+    userService.removeLike(req, res, (data) => {
+      res.json(data)
+    })
+  }
   // follow one user
 
   // unfollow one user

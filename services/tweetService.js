@@ -25,7 +25,10 @@ const tweetService = {
   // get one tweet
   getTweet: (req, res, callback) => {
     Tweet.findByPk(req.params.id,
-      { include: [{ model: Reply, include: [User] }]}).then(tweet => {
+      { include: [
+        { model: Reply, include: [User] },
+        { model: Like, include: [User] }
+      ]}).then(tweet => {
        callback({tweet: tweet})
     })
   },

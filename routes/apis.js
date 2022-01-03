@@ -48,9 +48,9 @@ router.post('/tweets/:tweet_id/replies', authenticated, replyController.createRe
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 
 // like
-router.post('/tweets/:id/like')
+router.post('/tweets/:id/like', authenticated, userController.addLike)
 
-router.post('/tweets/:id/unlike')
+router.post('/tweets/:id/unlike', authenticated, userController.removeLike)
 
 // followship
 router.post('/followships')
