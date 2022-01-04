@@ -33,7 +33,7 @@ router.get('/users/:id/likes', authenticated, userController.getUserLike)
 
 router.get('/users/:id/followings', authenticated, userController.getFollowing)
 
-router.get('/users/:id/followers')
+router.get('/users/:id/followers', authenticated, userController.getFollower)
 
 router.put('/users/:id')
 

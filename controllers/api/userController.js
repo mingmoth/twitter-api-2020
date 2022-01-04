@@ -101,7 +101,11 @@ let userController = {
     })
   },
   // get one user's followers
-
+  getFollower: (req, res) => {
+    userService.getFollower(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   // like one tweet
   addLike: (req, res) => {
     userService.addLike(req, res, (data) => {

@@ -120,7 +120,7 @@ const userService = {
     }).then(users => {
       users = users.Followings.map(user => ({
         ...user.dataValues,
-        isFollowed: user.Followship.followerId === Number(req.params.id),
+        isFollowed: req.user.Followings.map(f => f.id).includes(user.id),
       }))
       return callback({ users: users })
     }).catch(error => {
@@ -128,7 +128,17 @@ const userService = {
     })
   },
   // get one user's followers
-
+  getFollower: (req, res, callback) => {
+    User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followers' }]
+    }).then(users => {
+      users = users.Followers.map(user => ({
+        ...user.dataValues,
+        isFollowed: req.user.Followings.map(f => f.id).includes(user.id),
+      }))
+      return callback({ users: users })
+    }).catch(error => { return callback({ status: 'error', message: '無法取得追蹤此使用者對象'}) })
+  },
   // like one tweet
   addLike: (req, res, callback) => {
     Like.findOne({ where: { TweetId: req.params.id, UserId: helper.getUser(req).id } }).then(like => {
