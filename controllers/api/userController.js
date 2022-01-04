@@ -100,6 +100,12 @@ let userController = {
       return res.json(data)
     })
   },
+  // update user avatar / cover
+  updateUser: (req, res) => {
+    userService.updateUser(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   // get one user's followings
   getFollowing:(req, res) => {
     userService.getFollowing(req, res, (data) => {

@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs')
 const sequelize = require('sequelize')
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const helper = require('../_helpers')
 const db = require('../models')
 const User = db.User
@@ -171,6 +173,51 @@ const userService = {
         })
       }
     })
+  },
+  // update user avatar / cover
+  updateUser: async (req, res, callback) => {
+    if (Number(req.params.id) !== Number(helper.getUser(req).id)) return callback({ status: 'error', message: '無法編輯非本人帳號' })
+    if (!req.body.name || req.body.introduction.length > 160) return callback({ status: 'error', message: '請確認填寫帳戶名稱 及 介紹自紹不得超過160字元' })
+    try {
+      const user = await User.findByPk(helper.getUser(req).id)
+      const { name, introduction, avatar, cover } = req.body
+      const { files } = req
+      if (files) {
+        imgur.setClientID(IMGUR_CLIENT_ID);
+        const uploadImg = (file) => {
+          return new Promise((resolve, reject) => {
+            imgur.upload(file, (err, res) => {
+              resolve(res.data.link);
+            });
+          });
+        };
+
+        const newAvatar = files.avatar
+          ? await uploadImg(files.avatar[0].path)
+          : user.avatar;
+        const newCover = files.cover
+          ? await uploadImg(files.cover[0].path)
+          : user.cover;
+
+        await user.update({
+          name,
+          introduction,
+          avatar: newAvatar,
+          cover: newCover,
+        });
+        return callback({
+          status: "success",
+          message: "成功更新使用者資訊與圖片",
+        });
+      } else {
+        await user.update({
+          name, introduction
+        })
+        return callback({ status: 'success', message: '成功更新使用者資訊' })
+      }
+    } catch (error) {
+      return callback({ status: 'error', message: '無法更新使用者資訊與圖片' })
+    }
   },
   // like one tweet
   addLike: (req, res, callback) => {
