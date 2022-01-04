@@ -38,6 +38,8 @@ router.get('/users/:id/followers', authenticated, userController.getFollower)
 
 router.put('/users/:id', authenticated, userController.putUser)
 
+router.put('/users/:id/profile')
+
 // tweet
 router.get('/tweets', authenticated, tweetController.getTweets)
 
@@ -63,7 +65,7 @@ router.delete('/followships/:followingId', authenticated, userController.removeF
 // admin
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 
-router.get('/admin/tweets')
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 

@@ -3,10 +3,23 @@ const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
 
+const pageLimit = 10
+
 const adminService = {
   // get tweets by page
   getTweets: (req, res, callback) => {
-    Tweet.findAndCountAll({})
+    let offset = 0
+    if(req.query.page) {
+      offset = (req.query.page - 1) * pageLimit
+    }
+    Tweet.findAndCountAll({
+      order: [['createdAt', 'DESC']],
+      include: [User],
+      offset: offset,
+      limit: pageLimit
+    }).then(tweets => {
+      return callback({ tweets: tweets.rows })
+    }).catch(error => { return callback({ status: 'error', message: '無法取得推文資訊' }) })
   },
   // delete one tweet
   deleteTweet: (req, res, callback) => {
