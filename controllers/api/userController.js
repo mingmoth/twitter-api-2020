@@ -94,6 +94,12 @@ let userController = {
       return res.json(data)
     })
   },
+  // edit self profile
+  putUser: (req, res) => {
+    userService.putUser(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   // get one user's followings
   getFollowing:(req, res) => {
     userService.getFollowing(req, res, (data) => {

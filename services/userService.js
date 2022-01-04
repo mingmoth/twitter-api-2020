@@ -139,6 +139,38 @@ const userService = {
       return callback({ users: users })
     }).catch(error => { return callback({ status: 'error', message: '無法取得追蹤此使用者對象'}) })
   },
+  // edit self profile
+  putUser: (req, res, callback) => {
+    if(Number(req.params.id) !== Number(helper.getUser(req).id)) return callback({ status: 'error', message: '無法編輯非本人資訊' })
+    if(!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) return callback({ status: 'error', message: '請確認所有欄位皆已填寫' })
+    if(req.body.password !== req.body.checkPassword) return callback({ status: 'error', message: '兩次密碼輸入不正確' })
+    User.findOne({
+      where: { account: req.body.account }
+    }).then(user => {
+      if (Number(user.id) !== Number(helper.getUser(req).id)) {
+        return callback({ status: 'error', message: '此帳號已重複使用' })
+      } else {
+        User.findOne({
+          where: { email: req.body.email }
+        }).then(user => {
+          if (Number(user.id) !== Number(helper.getUser(req).id)) {
+            return callback({ status: 'error', message: '此電子郵件已重複使用' })
+          } else {
+            return User.findByPk(helper.getUser(req).id).then(user => {
+              user.update({
+                account: req.body.account,
+                name: req.body.name,
+                email: req.body.email,
+                password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+              }).then(user => {
+                return callback({ status: 'success', message: '成功更新使用者資訊' })
+              }).catch(error => { return callback({ status: 'error', message: '無法更新使用者資訊，請稍後再試' }) })
+            })
+          }
+        })
+      }
+    }) 
+  },
   // like one tweet
   addLike: (req, res, callback) => {
     Like.findOne({ where: { TweetId: req.params.id, UserId: helper.getUser(req).id } }).then(like => {
