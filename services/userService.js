@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const sequelize = require('sequelize')
 const helper = require('../_helpers')
 const db = require('../models')
 const User = db.User
@@ -10,21 +11,21 @@ const Followship = db.Followship
 const userService = {
   signUp: (req, res, callback) => {
     if (!req.body.name || !req.body.email || !req.body.account || !req.body.password || !req.body.checkPassword) {
-      callback({ status: 'error', messages: '請確認所有欄位已確實填寫'})
+      callback({ status: 'error', messages: '請確認所有欄位已確實填寫' })
     }
-    if(req.body.password !== req.body.checkPassword) {
+    if (req.body.password !== req.body.checkPassword) {
       callback({ status: 'error', messages: '兩次密碼輸入不一致' })
     }
     return User.findAll({
-      where: {email: req.body.email}
+      where: { email: req.body.email }
     }).then(user => {
-      if(user) {
+      if (user) {
         callback({ status: 'error', messages: '此電子郵件已重複使用' })
       }
     }).then(User.findAll({
-      where: { account: req.body.account}
+      where: { account: req.body.account }
     })).then(user => {
-      if(user) {
+      if (user) {
         callback({ status: 'error', messages: '此帳號已重複使用' })
       } else {
         User.create({
@@ -42,7 +43,7 @@ const userService = {
   // get currentUser
   getCurrentUser: async (req, res, callback) => {
     try {
-      await User.findByPk(helper.getUser(req).id 
+      await User.findByPk(helper.getUser(req).id
       ).then(user => {
         user = ({
           ...user.dataValues,
@@ -51,7 +52,7 @@ const userService = {
         return callback({ user: user })
       })
     } catch (error) {
-      return callback({ status: 'error', message: '無法取得當前使用者資訊'})
+      return callback({ status: 'error', message: '無法取得當前使用者資訊' })
     }
   },
   // get one user
@@ -76,7 +77,7 @@ const userService = {
   // get one user's tweets
   getUserTweet: (req, res, callback) => {
     Tweet.findAll({
-      where: { UserId: req.params.id},
+      where: { UserId: req.params.id },
       include: [User, Reply, Like]
     }).then(tweets => {
       tweets = tweets.map(tweet => {
@@ -103,7 +104,7 @@ const userService = {
   getUserLike: (req, res, callback) => {
     Like.findAll({
       where: { UserId: req.params.id },
-      include: [{ model: Tweet, include: [User]}]
+      include: [{ model: Tweet, include: [User] }]
     }).then(likes => {
       likes = likes.map(like => {
         return like = {
@@ -124,7 +125,7 @@ const userService = {
       }))
       return callback({ users: users })
     }).catch(error => {
-      return callback({ status: 'error', message: '無法取得此使用者追蹤對象'})
+      return callback({ status: 'error', message: '無法取得此使用者追蹤對象' })
     })
   },
   // get one user's followers
@@ -137,13 +138,13 @@ const userService = {
         isFollowed: req.user.Followings.map(f => f.id).includes(user.id),
       }))
       return callback({ users: users })
-    }).catch(error => { return callback({ status: 'error', message: '無法取得追蹤此使用者對象'}) })
+    }).catch(error => { return callback({ status: 'error', message: '無法取得追蹤此使用者對象' }) })
   },
   // edit self profile
   putUser: (req, res, callback) => {
-    if(Number(req.params.id) !== Number(helper.getUser(req).id)) return callback({ status: 'error', message: '無法編輯非本人資訊' })
-    if(!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) return callback({ status: 'error', message: '請確認所有欄位皆已填寫' })
-    if(req.body.password !== req.body.checkPassword) return callback({ status: 'error', message: '兩次密碼輸入不正確' })
+    if (Number(req.params.id) !== Number(helper.getUser(req).id)) return callback({ status: 'error', message: '無法編輯非本人資訊' })
+    if (!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) return callback({ status: 'error', message: '請確認所有欄位皆已填寫' })
+    if (req.body.password !== req.body.checkPassword) return callback({ status: 'error', message: '兩次密碼輸入不正確' })
     User.findOne({
       where: { account: req.body.account }
     }).then(user => {
@@ -169,19 +170,19 @@ const userService = {
           }
         })
       }
-    }) 
+    })
   },
   // like one tweet
   addLike: (req, res, callback) => {
     Like.findOne({ where: { TweetId: req.params.id, UserId: helper.getUser(req).id } }).then(like => {
-      if(like) {
+      if (like) {
         return callback({ status: 'error', message: '此篇推文已按讚' })
       } else {
         Like.create({
           TweetId: req.params.id,
           UserId: helper.getUser(req).id
         }).then(like => {
-          return callback({ status: 'success', message: '成功對推文按讚'})
+          return callback({ status: 'success', message: '成功對推文按讚' })
         })
       }
     })
@@ -189,7 +190,7 @@ const userService = {
   // cancel like from tweet
   removeLike: (req, res, callback) => {
     Like.findOne({ where: { TweetId: req.params.id, UserId: helper.getUser(req).id } }).then(like => {
-      if(!like) {
+      if (!like) {
         return callback({ status: 'error', message: '未對此篇推文按讚，無法取消讚' })
       } else {
         like.destroy().then(like => {
@@ -200,20 +201,20 @@ const userService = {
   },
   // follow one user
   addFollow: (req, res, callback) => {
-    if(Number(req.body.UserId) === Number(helper.getUser(req).id)) {
+    if (Number(req.body.UserId) === Number(helper.getUser(req).id)) {
       return callback({ status: 'error', message: '無法追蹤自己(當前使用者)' })
     }
     Followship.findOne({
       where: { followingId: req.body.UserId, followerId: helper.getUser(req).id }
     }).then(follow => {
-      if(follow) {
+      if (follow) {
         return callback({ status: 'error', message: '已追蹤此使用者' })
       } else {
         Followship.create({
           followingId: req.body.UserId,
           followerId: helper.getUser(req).id
         }).then(follow => {
-          return callback({ status: 'success', message: '成功追蹤此使用者'})
+          return callback({ status: 'success', message: '成功追蹤此使用者' })
         })
       }
     })
@@ -226,16 +227,31 @@ const userService = {
     Followship.findOne({
       where: { followingId: followingId, followerId: followerId }
     }).then(follow => {
-      if(!follow) {
-        return callback({ status: 'error', message: '尚未追蹤此使用者'})
+      if (!follow) {
+        return callback({ status: 'error', message: '尚未追蹤此使用者' })
       } else {
         follow.destroy().then(follow => {
-          return callback({ status: 'success', message: '成功取消追蹤此使用者'})
+          return callback({ status: 'success', message: '成功取消追蹤此使用者' })
         })
       }
     })
-  }
+  },
   // get top follows users
+  getTopUser: (req, res, callback) => {
+    User.findAll({
+      attributes: ['id', 'name', 'account', 'avatar',
+        [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE followingId = User.id)'),
+          'totalFollowers'],
+      ],
+      include: { model: User, as: 'Followers', attributes: [] },
+    }).then(users => {
+      users = users.map(user => ({
+        ...user.dataValues,
+        isFollowed: req.user.Followings.map(f => f.id).includes(user.id)
+      }))
+      return callback({ users: users })
+    }).catch(error => { return callback({ status: 'error', message: '無法取得熱門追蹤者' }) })
+  },
 }
 
 module.exports = userService
