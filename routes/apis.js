@@ -65,7 +65,7 @@ router.get('/admin/users', authenticated, authenticatedAdmin, adminController.ge
 
 router.get('/admin/tweets')
 
-router.delete('/admin/tweets/:id')
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 
 module.exports = router

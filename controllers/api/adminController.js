@@ -8,7 +8,11 @@ const adminController = {
   // get tweets by page
 
   // delete one tweet
-
+  deleteTweet: (req, res) => {
+    adminService.deleteTweet(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   // get users
   getUsers: (req, res) => {
     adminService.getUsers(req, res, (data) => {
