@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const session = require('express-session')
 const flash = require('connect-flash')
 const passport = require('./config/passport')
+const cors = require('cors')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -36,6 +37,9 @@ function authenticated(req, res, next) {
 };
 // 
 // app.use('/upload', express.static(__dirname + '/upload'))
+
+// cors setting
+app.use(cors())
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

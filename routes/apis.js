@@ -12,9 +12,9 @@ const adminController = require('../controllers/api/adminController')
 const authenticated = passport.authenticate('jwt', { session: false })
 
 const authenticatedAdmin = (req, res, next) => {
-  if(req.user) {
+  if (req.user) {
     if (req.user.role === "admin") { return next() }
-    return res.json({ status: 'error', message: '無存取權限'})
+    return res.json({ status: 'error', message: '無存取權限' })
   } else {
     return res.json({ status: 'error', message: '無存取權限' })
   }
