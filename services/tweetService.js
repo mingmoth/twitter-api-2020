@@ -9,6 +9,7 @@ const tweetService = {
   // get all tweets
   getTweets: (req, res, callback) => {
     Tweet.findAll({
+      order: [['createdAt', 'DESC']],
       include: [ User, Reply, Like ]
     }).then(tweets => {
       tweets = tweets.map(tweet => {
