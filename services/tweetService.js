@@ -42,7 +42,7 @@ const tweetService = {
         description: req.body.description,
         UserId: helper.getUser(req).id,
       }).then(tweet => {
-        return callback({status: 'success', message: '成功新增推文'})
+        return callback({status: 'success', message: '成功新增推文', tweet: tweet})
       })
     } catch (error) {
       return callback({ status: 'error', message: '無法新增推文，請稍後再試' })

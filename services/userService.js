@@ -251,6 +251,7 @@ const userService = {
     if (Number(req.body.UserId) === Number(helper.getUser(req).id)) {
       return callback({ status: 'error', message: '無法追蹤自己(當前使用者)' })
     }
+    if(!req.body.UserId) return callback({ status: 'error', message: '請選定追蹤對象' })
     Followship.findOne({
       where: { followingId: req.body.UserId, followerId: helper.getUser(req).id }
     }).then(follow => {
@@ -296,7 +297,7 @@ const userService = {
         ...user.dataValues,
         isFollowed: req.user.Followings.map(f => f.id).includes(user.id)
       }))
-      return callback({ users: users })
+      return callback({ users: users.filter(user => user.id !== req.user.id) })
     }).catch(error => { return callback({ status: 'error', message: '無法取得熱門追蹤者' }) })
   },
 }
