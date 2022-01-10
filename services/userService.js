@@ -61,14 +61,15 @@ const userService = {
   getUser: async (req, res, callback) => {
     try {
       await User.findByPk(req.params.id, {
-        include: [
+        include: [ Tweet,
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
         ]
       }).then(user => {
         user = ({
           ...user.dataValues,
-          password: ''
+          password: '',
+          Tweets: user.Tweets.length
         })
         return callback({ user: user })
       })
@@ -80,13 +81,15 @@ const userService = {
   getUserTweet: (req, res, callback) => {
     Tweet.findAll({
       where: { UserId: req.params.id },
+      order: [['createdAt', 'DESC']],
       include: [User, Reply, Like]
     }).then(tweets => {
       tweets = tweets.map(tweet => {
         return tweet = {
           ...tweet.dataValues,
           Replies: tweet.Replies.length,
-          Likes: tweet.Likes.length
+          Likes: tweet.Likes.length,
+          isLiked: tweet.Likes.map(d => d.UserId).includes(helper.getUser(req).id)
         }
       })
       return callback({ tweets: tweets })
@@ -97,7 +100,11 @@ const userService = {
   // get one user's replies
   getUserReply: (req, res, callback) => {
     Tweet.findAll({
-      include: [{ model: Reply, where: { UserId: req.params.id } }, User]
+      order: [['createdAt', 'DESC']],
+      include: [User, { 
+        model: Reply, where: {
+          UserId: req.params.id, 
+        }, include: [User] } ],
     }).then(tweets => {
       return callback({ tweets: tweets })
     }).catch(error => { return callback({ status: 'error', message: '無法取得使用者回復資訊，請稍後再試' }) })
