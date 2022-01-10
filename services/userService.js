@@ -229,7 +229,7 @@ const userService = {
           TweetId: req.params.id,
           UserId: helper.getUser(req).id
         }).then(like => {
-          return callback({ status: 'success', message: '成功對推文按讚' })
+          return callback({ status: 'success', message: '成功對推文按讚', like: like })
         })
       }
     })

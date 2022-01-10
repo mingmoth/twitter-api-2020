@@ -11,7 +11,7 @@ const replyService = {
       UserId: helper.getUser(req).id,
       TweetId: req.params.tweet_id
     }).then(reply => {
-      return callback({status: 'success', message: '成功新增推文回覆'})
+      return callback({status: 'success', message: '成功新增推文回覆', reply: reply})
     })
   },
   // get replies
