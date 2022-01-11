@@ -101,10 +101,13 @@ const userService = {
   getUserReply: (req, res, callback) => {
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
-      include: [User, { 
-        model: Reply, where: {
+      include: [User, Like, { 
+        model: Reply, 
+        where: {
           UserId: req.params.id, 
-        }, include: [User] } ],
+        }, 
+        include: [User],
+       } ],
     }).then(tweets => {
       return callback({ tweets: tweets })
     }).catch(error => { return callback({ status: 'error', message: '無法取得使用者回復資訊，請稍後再試' }) })
@@ -118,6 +121,7 @@ const userService = {
       likes = likes.map(like => {
         return like = {
           ...like.Tweet.dataValues,
+          isLiked: true
         }
       })
       return callback({ likes: likes })
@@ -151,7 +155,10 @@ const userService = {
   },
   // edit self profile
   putUser: (req, res, callback) => {
-    if (Number(req.params.id) !== Number(helper.getUser(req).id)) return callback({ status: 'error', message: '無法編輯非本人資訊' })
+    // console.log((req.params.id))
+    // console.log(helper.getUser(req).id)
+    // if (Number(req.params.id) !== Number(helper.getUser(req).id)) return callback({ status: 'error', message: '無法編輯非本人資訊' })
+    console.log(req.body.account, req.body.name, req.body.email, req.body.password, req.body.checkPassword)
     if (!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) return callback({ status: 'error', message: '請確認所有欄位皆已填寫' })
     if (req.body.password !== req.body.checkPassword) return callback({ status: 'error', message: '兩次密碼輸入不正確' })
     User.findOne({
