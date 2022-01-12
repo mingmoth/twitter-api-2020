@@ -191,12 +191,19 @@ const userService = {
   // update user avatar / cover
   updateUser: async (req, res, callback) => {
     if (Number(req.params.id) !== Number(helper.getUser(req).id)) return callback({ status: 'error', message: '無法編輯非本人帳號' })
-    if (!req.body.name || req.body.introduction.length > 160) return callback({ status: 'error', message: '請確認填寫帳戶名稱 及 介紹自紹不得超過160字元' })
+    if (!req.body.name) return callback({ status: 'error', message: '請確認填寫帳戶名稱' })
+    if (req.body.introduction ? req.body.introduction.length > 160 ? ture: false : false) return callback({ status: 'error', message: '自我介紹不得超過160字元' })
     try {
       const user = await User.findByPk(helper.getUser(req).id)
-      const { name, introduction, avatar, cover } = req.body
+      const { name, introduction } = req.body
       const { files } = req
-      if (files) {
+      if (!files) {
+        await user.update({
+          name, introduction
+        })
+        return callback({ status: 'success', message: '成功更新使用者資訊' })
+
+      } else {
         imgur.setClientID(IMGUR_CLIENT_ID);
         const uploadImg = (file) => {
           return new Promise((resolve, reject) => {
@@ -209,10 +216,11 @@ const userService = {
         const newAvatar = files.avatar
           ? await uploadImg(files.avatar[0].path)
           : user.avatar;
+        
         const newCover = files.cover
           ? await uploadImg(files.cover[0].path)
           : user.cover;
-
+        
         await user.update({
           name,
           introduction,
@@ -223,13 +231,9 @@ const userService = {
           status: "success",
           message: "成功更新使用者資訊與圖片",
         });
-      } else {
-        await user.update({
-          name, introduction
-        })
-        return callback({ status: 'success', message: '成功更新使用者資訊' })
       }
     } catch (error) {
+      console.log(error)
       return callback({ status: 'error', message: '無法更新使用者資訊與圖片' })
     }
   },
