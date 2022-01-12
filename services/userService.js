@@ -109,6 +109,12 @@ const userService = {
         include: [User],
        } ],
     }).then(tweets => {
+      tweets = tweets.map(tweet => {
+        return tweet = {
+          ...tweet.dataValues,
+          isLiked: tweet.Likes.map(d => d.UserId).includes(helper.getUser(req).id)
+        }
+      })
       return callback({ tweets: tweets })
     }).catch(error => { return callback({ status: 'error', message: '無法取得使用者回復資訊，請稍後再試' }) })
   },
