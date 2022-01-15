@@ -11,14 +11,25 @@ const adminService = {
     let offset = 0
     if(req.query.page) {
       offset = (req.query.page - 1) * pageLimit
-    }
+    } 
     Tweet.findAndCountAll({
       order: [['createdAt', 'DESC']],
       include: [User],
       offset: offset,
       limit: pageLimit
-    }).then(tweets => {
-      return callback({ tweets: tweets.rows })
+    }).then(result => {
+      const page = Number(req.query.page) || 1
+      const pages = Math.ceil(result.count / pageLimit)
+      const totalPage = Array.from({ length: pages}).map((item, index) => index + 1)
+      const prev = page - 1 < 1 ? 1 : page - 1
+      const next = page + 1 > pages ? page: page + 1
+      return callback({
+        tweets: result.rows,
+        page: page,
+        totalPage: totalPage,
+        prev: prev,
+        next: next
+      })
     }).catch(error => { return callback({ status: 'error', message: '無法取得推文資訊' }) })
   },
   // delete one tweet

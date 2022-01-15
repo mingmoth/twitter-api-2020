@@ -11,36 +11,58 @@ const Like = db.Like
 const Followship = db.Followship
 
 const userService = {
-  signUp: (req, res, callback) => {
+  signUp: async (req, res, callback) => {
     if (!req.body.name || !req.body.email || !req.body.account || !req.body.password || !req.body.checkPassword) {
       callback({ status: 'error', messages: '請確認所有欄位已確實填寫' })
     }
     if (req.body.password !== req.body.checkPassword) {
       callback({ status: 'error', messages: '兩次密碼輸入不一致' })
     }
-    return User.findAll({
-      where: { email: req.body.email }
-    }).then(user => {
-      if (user) {
-        callback({ status: 'error', messages: '此電子郵件已重複使用' })
+    try {
+      const checkAccount = await User.findOne({ where: { account: req.body.account } })
+      const checkEmail = await User.findOne({ where: { email: req.body.email } })
+      if (checkAccount) {
+        return callback({ status: 'error', messages: `此帳號${checkAccount.account}已重複使用` })
+      } 
+      if (checkEmail) {
+        return callback({ status: 'error', messages: `此電子郵件${checkEmail.email}已重複使用` })
       }
-    }).then(User.findAll({
-      where: { account: req.body.account }
-    })).then(user => {
-      if (user) {
-        callback({ status: 'error', messages: '此帳號已重複使用' })
-      } else {
-        User.create({
-          name: req.body.name,
-          email: req.body.email,
-          acoount: req.body.account,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
-          role: 'user',
-        }).then(user => {
-          callback({ status: 'success', messages: '成功註冊帳號' })
-        })
-      }
-    })
+      await User.create({
+        name: req.body.name,
+        email: req.body.email,
+        account: req.body.account,
+        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
+        role: 'user',
+      })
+      return callback({ status: 'success', messages: '成功註冊帳號' })
+    } catch (error) {
+      return callback({ status: 'error', messages: '無法註冊帳號，請稍後再試' })
+    }
+    // User.findOne({
+    //   where: { email: req.body.email }
+    // }).then(user => {
+    //   if (user) {
+    //     return callback({ status: 'error', messages: '此電子郵件已重複使用' })
+    //   } else {
+    //     User.findOne({
+    //       where: { account: req.body.account }
+    //     }).then(user => {
+    //       if (user) {
+    //         return callback({ status: 'error', messages: '此帳號已重複使用' })
+    //       } else {
+    //         User.create({
+    //           name: req.body.name,
+    //           email: req.body.email,
+    //           acoount: req.body.account,
+    //           password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
+    //           role: 'user',
+    //         }).then(user => {
+    //           callback({ status: 'success', messages: '成功註冊帳號' })
+    //         })
+    //       }
+    //     })
+    //   }
+    // })
   },
   // get currentUser
   getCurrentUser: async (req, res, callback) => {
@@ -61,7 +83,7 @@ const userService = {
   getUser: async (req, res, callback) => {
     try {
       await User.findByPk(req.params.id, {
-        include: [ Tweet,
+        include: [Tweet,
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
         ]
@@ -69,7 +91,8 @@ const userService = {
         user = ({
           ...user.dataValues,
           password: '',
-          Tweets: user.Tweets.length
+          Tweets: user.Tweets.length,
+          isFollowed: req.user.Followings.map(f => f.id).includes(user.id),
         })
         return callback({ user: user })
       })
@@ -101,13 +124,13 @@ const userService = {
   getUserReply: (req, res, callback) => {
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
-      include: [User, Like, { 
-        model: Reply, 
+      include: [User, Like, {
+        model: Reply,
         where: {
-          UserId: req.params.id, 
-        }, 
+          UserId: req.params.id,
+        },
         include: [User],
-       } ],
+      }],
     }).then(tweets => {
       tweets = tweets.map(tweet => {
         return tweet = {
@@ -122,16 +145,18 @@ const userService = {
   getUserLike: (req, res, callback) => {
     Like.findAll({
       where: { UserId: req.params.id },
-      include: [{ model: Tweet, include: [User] }]
+      include: [{ model: Tweet, include: [User, Reply, Like] }]
     }).then(likes => {
       likes = likes.map(like => {
         return like = {
           ...like.Tweet.dataValues,
-          isLiked: true
+          Replies: like.Tweet.Replies.length,
+          Likes: like.Tweet.Likes.length,
+          isLiked: like.Tweet.Likes.map(like => like.UserId).includes(helper.getUser(req).id)
         }
       })
       return callback({ likes: likes })
-    }).catch(error => { return callback({ status: 'error', message: '無法取得使用者按讚資訊，請稍後再試' }) })
+    }).catch(error => { return callback({ status: 'error', message: '無法取得使用者按讚資訊，請稍後再試', error: error }) })
   },
   // get one user's followings
   getFollowing: (req, res, callback) => {
@@ -198,7 +223,9 @@ const userService = {
   updateUser: async (req, res, callback) => {
     if (Number(req.params.id) !== Number(helper.getUser(req).id)) return callback({ status: 'error', message: '無法編輯非本人帳號' })
     if (!req.body.name) return callback({ status: 'error', message: '請確認填寫帳戶名稱' })
-    if (req.body.introduction ? req.body.introduction.length > 160 ? ture: false : false) return callback({ status: 'error', message: '自我介紹不得超過160字元' })
+
+    console.log(req.body.introduction)
+    if (req.body.introduction ? req.body.introduction.length > 160 ? ture : false : false) return callback({ status: 'error', message: '自我介紹不得超過160字元' })
     try {
       const user = await User.findByPk(helper.getUser(req).id)
       const { name, introduction } = req.body
@@ -222,11 +249,11 @@ const userService = {
         const newAvatar = files.avatar
           ? await uploadImg(files.avatar[0].path)
           : user.avatar;
-        
+
         const newCover = files.cover
           ? await uploadImg(files.cover[0].path)
           : user.cover;
-        
+
         await user.update({
           name,
           introduction,
@@ -275,7 +302,7 @@ const userService = {
     if (Number(req.body.UserId) === Number(helper.getUser(req).id)) {
       return callback({ status: 'error', message: '無法追蹤自己(當前使用者)' })
     }
-    if(!req.body.UserId) return callback({ status: 'error', message: '請選定追蹤對象' })
+    if (!req.body.UserId) return callback({ status: 'error', message: '請選定追蹤對象' })
     Followship.findOne({
       where: { followingId: req.body.UserId, followerId: helper.getUser(req).id }
     }).then(follow => {

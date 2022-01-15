@@ -33,35 +33,8 @@ let userController = {
     })
   },
   signUp: (req, res) => {
-    if (!req.body.name || !req.body.email || !req.body.account || !req.body.password || !req.body.checkPassword) {
-      return res.json({ status: 'error', messages: '請確認所有欄位已確實填寫' })
-    }
-    if (req.body.password !== req.body.checkPassword) {
-      return res.json({ status: 'error', messages: '兩次密碼輸入不一致' })
-    }
-    User.findOne({
-      where: { email: req.body.email }
-    }).then(user => {
-      if (user) {
-        return res.json({ status: 'error', messages: '此電子郵件已重複使用' })
-      }
-    })
-    User.findOne({
-      where: { account: req.body.account }
-    }).then(user => {
-      if (user) {
-        return res.json({ status: 'error', messages: '此帳號已重複使用' })
-      } else {
-        User.create({
-          name: req.body.name,
-          email: req.body.email,
-          account: req.body.account,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
-          role: 'user',
-        }).then(user => {
-          return res.json({ status: 'success', messages: '成功註冊帳號' })
-        })
-      }
+    userService.signUp(req, res, (data) => {
+      return res.json(data)
     })
   },
   // get currentUser
