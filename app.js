@@ -32,6 +32,10 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // use helpers.getUser(req) to replace req.user
+app.use((req, res, next) => {
+  res.locals.user = helpers.getUser(req)
+  next()
+})
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
