@@ -22,7 +22,7 @@ let userController = {
       // 簽發token
       let payload = {id: user.id}
       let token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.json({
+      return res.status(200).json({
         status: 'success',
         message: '登入成功',
         token: token,

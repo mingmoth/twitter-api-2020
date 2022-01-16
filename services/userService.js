@@ -34,35 +34,10 @@ const userService = {
         password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
         role: 'user',
       })
-      return callback({ status: 'success', messages: '成功註冊帳號' })
+      return callback({ status: '200', messages: '成功註冊帳號' })
     } catch (error) {
-      return callback({ status: 'error', messages: '無法註冊帳號，請稍後再試' })
+      return callback({ status: '500', messages: '無法註冊帳號，請稍後再試' })
     }
-    // User.findOne({
-    //   where: { email: req.body.email }
-    // }).then(user => {
-    //   if (user) {
-    //     return callback({ status: 'error', messages: '此電子郵件已重複使用' })
-    //   } else {
-    //     User.findOne({
-    //       where: { account: req.body.account }
-    //     }).then(user => {
-    //       if (user) {
-    //         return callback({ status: 'error', messages: '此帳號已重複使用' })
-    //       } else {
-    //         User.create({
-    //           name: req.body.name,
-    //           email: req.body.email,
-    //           acoount: req.body.account,
-    //           password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
-    //           role: 'user',
-    //         }).then(user => {
-    //           callback({ status: 'success', messages: '成功註冊帳號' })
-    //         })
-    //       }
-    //     })
-    //   }
-    // })
   },
   // get currentUser
   getCurrentUser: async (req, res, callback) => {
@@ -94,10 +69,10 @@ const userService = {
           Tweets: user.Tweets.length,
           isFollowed: req.user.Followings.map(f => f.id).includes(user.id),
         })
-        return callback({ user: user })
+        return callback({ status: '200', user: user })
       })
     } catch (error) {
-      return callback({ status: 'error', message: '無法取使用者資訊' })
+      return callback({ status: '500', message: '無法取使用者資訊' })
     }
   },
   // get one user's tweets
@@ -115,9 +90,9 @@ const userService = {
           isLiked: tweet.Likes.map(d => d.UserId).includes(helper.getUser(req).id)
         }
       })
-      return callback({ tweets: tweets })
+      return callback({ status: '200', tweets: tweets })
     }).catch(error => {
-      return callback({ status: 'error', message: '無法取得使用者推文資訊，請稍後再試' })
+      return callback({ status: '500', message: '無法取得使用者推文資訊，請稍後再試' })
     })
   },
   // get one user's replies
@@ -138,8 +113,8 @@ const userService = {
           isLiked: tweet.Likes.map(d => d.UserId).includes(helper.getUser(req).id)
         }
       })
-      return callback({ tweets: tweets })
-    }).catch(error => { return callback({ status: 'error', message: '無法取得使用者回復資訊，請稍後再試' }) })
+      return callback({ status: '200', tweets: tweets })
+    }).catch(error => { return callback({ status: '500', message: '無法取得使用者回復資訊，請稍後再試' }) })
   },
   // get one user's liked tweets
   getUserLike: (req, res, callback) => {
@@ -155,8 +130,8 @@ const userService = {
           isLiked: like.Tweet.Likes.map(like => like.UserId).includes(helper.getUser(req).id)
         }
       })
-      return callback({ likes: likes })
-    }).catch(error => { return callback({ status: 'error', message: '無法取得使用者按讚資訊，請稍後再試', error: error }) })
+      return callback({ status: '200', likes: likes })
+    }).catch(error => { return callback({ status: '500', message: '無法取得使用者按讚資訊，請稍後再試', error: error }) })
   },
   // get one user's followings
   getFollowing: (req, res, callback) => {
@@ -167,9 +142,9 @@ const userService = {
         ...user.dataValues,
         isFollowed: req.user.Followings.map(f => f.id).includes(user.id),
       }))
-      return callback({ users: users })
+      return callback({ status: '200', users: users })
     }).catch(error => {
-      return callback({ status: 'error', message: '無法取得此使用者追蹤對象' })
+      return callback({ status: '500', message: '無法取得此使用者追蹤對象' })
     })
   },
   // get one user's followers
@@ -189,7 +164,6 @@ const userService = {
     // console.log((req.params.id))
     // console.log(helper.getUser(req).id)
     // if (Number(req.params.id) !== Number(helper.getUser(req).id)) return callback({ status: 'error', message: '無法編輯非本人資訊' })
-    console.log(req.body.account, req.body.name, req.body.email, req.body.password, req.body.checkPassword)
     if (!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) return callback({ status: 'error', message: '請確認所有欄位皆已填寫' })
     if (req.body.password !== req.body.checkPassword) return callback({ status: 'error', message: '兩次密碼輸入不正確' })
     User.findOne({
