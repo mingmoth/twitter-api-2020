@@ -36,7 +36,7 @@ const adminService = {
   deleteTweet: (req, res, callback) => {
     Tweet.findByPk(req.params.id).then(tweet => {
       tweet.destroy()
-        .then(tweet => { return callback({ statuts: 'success', message: '成功刪除推文' }) })
+        .then(tweet => { return callback({ status: 'success', message: '成功刪除推文' }) })
         .catch(error => { return callback({ status: 'error', message: '無法刪除推文，請稍後再試' }) })
     })
   },
