@@ -10,8 +10,8 @@ module.exports = (Server, httpServer) => {
   })
   const userList = []
 
-  io.use(socketAuth).on('connection', (socket) => {
-    console.log(socket.user)
+  io.on('connection', (socket) => {
+    console.log('connecttttttttttttttttttttttt')
     // 取得當前使用者資訊
     const currentUser = socket.user
 
@@ -66,28 +66,31 @@ module.exports = (Server, httpServer) => {
 
     // 傳送訊息
     socket.on('sendMessage', async (data) => {
+      console.log(data)
       // 輸入空白訊息，不動作
       if (data.text.trim() === '') {
         return
       }
+      io.to(data.roomName).emit('newMessage', data.message)
 
       // 根據公開頻道或是私人頻道做相應處理
-      if (data.roomName === 'public') {
-        const message = await postMessage(data, currentUser.id)
-        message.avatar = currentUser.avatar
-        io.to(message.roomName).emit('message', message)
-      } else {
-        const userId = Number(data.id) // 其他使用者id
-        if (userId === -1) {
-          return
-        }
-        const roomName = createRoomName(userId, currentUser.id)
-        data.roomName = roomName
-        const message = await postMessage(data, currentUser.id)
-        message.avatar = currentUser.avatar
-        io.to(message.roomName).emit('message', message)
-        socket.broadcast.emit('privateMessage')
-      }
+      // if (data.roomName === 'public') {
+      //   const message = await postMessage(data, currentUser.id)
+      //   message.avatar = currentUser.avatar
+      //   io.to(data.roomName).emit('message', data.message)
+      // } 
+      // else {
+      //   const userId = Number(data.id) // 其他使用者id
+      //   if (userId === -1) {
+      //     return
+      //   }
+      //   const roomName = createRoomName(userId, currentUser.id)
+      //   data.roomName = roomName
+      //   const message = await postMessage(data, currentUser.id)
+      //   message.avatar = currentUser.avatar
+      //   io.to(message.roomName).emit('message', message)
+      //   socket.broadcast.emit('privateMessage')
+      // }
     })
 
     // 使用者離線
