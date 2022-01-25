@@ -27,7 +27,7 @@ let userController = {
         message: '登入成功',
         token: token,
         user: {
-          id: user.id, account: user.account, name: user.name, email: user.email, role: user.role
+          id: user.id, account: user.account, name: user.name, email: user.email, role: user.role, avatar: user.avatar,
         }
       })
     })
