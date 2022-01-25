@@ -54,6 +54,13 @@ router.post('/tweets', authenticated, tweetController.createTweet)
 
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
 
+// message
+router.post('/messages')
+
+router.get('/messages/public')
+
+router.get('/messages/:roomName')
+
 // reply
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.createReply)
 
