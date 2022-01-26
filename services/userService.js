@@ -312,7 +312,7 @@ const userService = {
   // get top follows users
   getTopUser: (req, res, callback) => {
     User.findAll({
-      attributes: ['id', 'name', 'account', 'avatar',
+      attributes: ['id', 'name', 'account', 'avatar', 'introduction',
         [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE followingId = User.id)'),
           'totalFollowers'],
       ],

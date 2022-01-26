@@ -6,14 +6,14 @@ function getUser(req) {
   return req.user;
 }
 
-// function socketAuth(socket, next) {
-//   const token = socket.handshake.auth.token
-//   const SECRET = process.env.JWT_SECRET
-
-//   jwt.verify(token, SECRET)
-// }
+function createPrivateRoom(a, b) {
+  let array = [a, b]
+  array.sort(a, b => (a-b))
+  return array
+}
 
 module.exports = {
   ensureAuthenticated,
   getUser,
+  createPrivateRoom
 };

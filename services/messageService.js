@@ -1,4 +1,5 @@
 const helper = require('../_helpers')
+const { Op } = require("sequelize");
 const db = require('../models')
 const { Message, User } = db
 
@@ -34,14 +35,30 @@ const messageService = {
     }
   },
 
-  getPrivateMessage: async (req, res, callback) => {
+  getMessagedUser: async (req, res, callback) => {
+    const currentId = helper.getUser(req).id
     try {
       await Message.findAll({
-        where: { roomName: ['req.body.roomName'] },
+        where: {
+          roomName: { [Op.or]: [{ [Op.like]: `${currentId}-%` }, { [Op.like]: `%-${currentId}` }] }
+        }
+      }).then(messages => {
+        return callback({ status: 'success', message: '成功取得對話紀錄', messages: messages})
+      })
+    } catch (error) {
+      return callback({ status: 'error', message: '無法取得私訊紀錄，請稍後再試'})
+    }
+  },
+
+  getPrivateMessage: async (req, res, callback) => {
+    try {
+      console.log(req.params.roomName)
+      await Message.findAll({
+        where: { roomName: req.params.roomName },
         order: [['createdAt', 'ASC']],
         include: [ User ],
       }).then(messages => {
-        return callback({ status: 'success', message: '成功傳送訊息', messages: messages })
+        return callback({ status: 'success', message: '成功取得訊息', messages: messages })
       })
     } catch (error) {
       return callback({ status: 'error', message: '無法取得私人聊天訊息，請稍後再試' })

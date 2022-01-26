@@ -8,19 +8,19 @@ module.exports = (Server, httpServer) => {
     },
     allowEIO3: true
   })
-  const userList = []
+  let userList = []
 
   io.on('connection', (socket) => {
     console.log('connecttttttttttttttttttttttt')
     // 取得當前使用者資訊
-    const currentUser = socket.user
+    // const currentUser = socket.user
     
     // 取得上線者資料
     // const checkUser = userList.find(user => user.id === currentUser.id)
     // if (!checkUser) {
     //   userList.push(socket.user)
     // }
-    console.log(userList)
+    // console.log(userList)
 
     // 未讀私人訊息
     // socket.on('messageNotReadInit', async () => {
@@ -32,16 +32,18 @@ module.exports = (Server, httpServer) => {
     // 加入特定頻道(public or private)
     socket.on('joinRoom', async (data) => {
       if (data.roomName === 'public') {
-        console.log(`${data.user.name} has join public Room`)
+        if (!userList.map(userlist => userlist.id).includes(data.user.id)) {
+          userList = userList.concat(data.user)
+        }
         socket.join('public')
+        console.log(data.user.id)
         io.emit('join', {
           ...data,
           message: `${data.user.name} 進入聊天室`,
           type: 'announce'
         })
-        // io.emit('loginStatus', `${data.user.name}已經加入了`)
-        // io.emit('loginUser', userList)
-      } 
+        io.emit('onlineUser', userList)
+      }
       // else {
       //   socket.leaveAll()
       //   const userId = Number(data.id) // 其他使用者id
@@ -60,13 +62,17 @@ module.exports = (Server, httpServer) => {
     // 離開特定頻道(public or private)
     socket.on('leaveRoom', (data) => {
       if (data.roomName === 'public') {
+        console.log(data.user.id)
+        userList = userList.filter(userlist => userlist.id !== data.user.id)
         socket.leave('public')
         io.emit('leave', {
           ...data,
           message: `${data.user.name} 離開聊天室`,
           type: 'announce'
         })
-      } 
+        io.emit('onlineUser', userList)
+        return userList
+      }
       // else {
       //   const userId = Number(data.id)
       //   const roomName = createRoomName(userId, currentUser.id)
