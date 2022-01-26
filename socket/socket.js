@@ -14,64 +14,72 @@ module.exports = (Server, httpServer) => {
     console.log('connecttttttttttttttttttttttt')
     // 取得當前使用者資訊
     const currentUser = socket.user
-
+    
     // 取得上線者資料
-    const checkUser = userList.find(user => user.id === currentUser.id)
-    if (!checkUser) {
-      userList.push(socket.user)
-    }
+    // const checkUser = userList.find(user => user.id === currentUser.id)
+    // if (!checkUser) {
+    //   userList.push(socket.user)
+    // }
     console.log(userList)
 
     // 未讀私人訊息
-    socket.on('messageNotReadInit', async () => {
-      const notRead = await getNotRead(currentUser.id)
-      console.log('init', notRead)
-      socket.emit('messageNotRead', notRead)
-    })
+    // socket.on('messageNotReadInit', async () => {
+    //   const notRead = await getNotRead(currentUser.id)
+    //   console.log('init', notRead)
+    //   socket.emit('messageNotRead', notRead)
+    // })
 
     // 加入特定頻道(public or private)
     socket.on('joinRoom', async (data) => {
       if (data.roomName === 'public') {
-        console.log(`${currentUser.name} has join public Room`)
-        socket.join('public')
-        io.emit('loginStatus', `${currentUser.name}已經加入了`)
-        io.emit('loginUser', userList)
-      } else {
-        socket.leaveAll()
-        const userId = Number(data.id) // 其他使用者id
-        const roomName = createRoomName(userId, currentUser.id)
-        socket.join(roomName)
-        console.log(`${currentUser.name} has join ${roomName} Room`)
+        console.log(`${data.user.name} has join public Room`)
+        // socket.join('public')
+        io.emit('login', {
+          ...data,
+          type: 'announce'
+        })
+        // io.emit('loginStatus', `${data.user.name}已經加入了`)
+        // io.emit('loginUser', userList)
+      } 
+      // else {
+      //   socket.leaveAll()
+      //   const userId = Number(data.id) // 其他使用者id
+      //   const roomName = createRoomName(userId, currentUser.id)
+      //   socket.join(roomName)
+      //   console.log(`${currentUser.name} has join ${roomName} Room`)
 
-        // 移除特定頻道的未讀
-        await changeToRead(roomName, currentUser.id)
-        const notRead = await getNotRead(currentUser.id)
-        console.log('join', notRead)
-        socket.emit('messageNotRead', notRead)
-      }
+      //   // 移除特定頻道的未讀
+      //   await changeToRead(roomName, currentUser.id)
+      //   const notRead = await getNotRead(currentUser.id)
+      //   console.log('join', notRead)
+      //   socket.emit('messageNotRead', notRead)
+      // }
     })
 
     // 離開特定頻道(public or private)
-    socket.on('leaveRoom', (data) => {
-      if (data.roomName === 'public') {
-        console.log(`${currentUser.name} has left public Room`)
-        socket.leave('public')
-      } else {
-        const userId = Number(data.id)
-        const roomName = createRoomName(userId, currentUser.id)
-        console.log(`${currentUser.name} has left ${roomName} Room`)
-        socket.join(roomName)
-      }
-    })
+    // socket.on('leaveRoom', (data) => {
+    //   if (data.roomName === 'public') {
+    //     console.log(`${currentUser.name} has left public Room`)
+    //     socket.leave('public')
+    //   } else {
+    //     const userId = Number(data.id)
+    //     const roomName = createRoomName(userId, currentUser.id)
+    //     console.log(`${currentUser.name} has left ${roomName} Room`)
+    //     socket.join(roomName)
+    //   }
+    // })
 
     // 傳送訊息
     socket.on('sendMessage', async (data) => {
-      console.log(data)
+      console.log(data.message)
       // 輸入空白訊息，不動作
-      if (data.text.trim() === '') {
+      if (data.message.trim() === '') {
         return
       }
-      io.to(data.roomName).emit('newMessage', data.message)
+      io.emit('newMessage', {
+        ...data,
+        type: 'message'
+      })
 
       // 根據公開頻道或是私人頻道做相應處理
       // if (data.roomName === 'public') {
