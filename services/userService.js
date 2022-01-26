@@ -13,10 +13,10 @@ const Followship = db.Followship
 const userService = {
   signUp: async (req, res, callback) => {
     if (!req.body.name || !req.body.email || !req.body.account || !req.body.password || !req.body.checkPassword) {
-      callback({ status: 'error', messages: '請確認所有欄位已確實填寫' })
+      return callback({ status: 'error', messages: '請確認所有欄位已確實填寫' })
     }
     if (req.body.password !== req.body.checkPassword) {
-      callback({ status: 'error', messages: '兩次密碼輸入不一致' })
+      return callback({ status: 'error', messages: '兩次密碼輸入不一致' })
     }
     try {
       const checkAccount = await User.findOne({ where: { account: req.body.account } })

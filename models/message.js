@@ -4,7 +4,8 @@ module.exports = (sequelize, DataTypes) => {
     message: DataTypes.STRING,
     isRead: DataTypes.BOOLEAN,
     UserId: DataTypes.INTEGER,
-    roomName: DataTypes.STRING
+    roomName: DataTypes.STRING,
+    type: DataTypes.STRING,
   }, {});
   Message.associate = function(models) {
     // associations can be defined here

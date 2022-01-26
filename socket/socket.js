@@ -33,9 +33,10 @@ module.exports = (Server, httpServer) => {
     socket.on('joinRoom', async (data) => {
       if (data.roomName === 'public') {
         console.log(`${data.user.name} has join public Room`)
-        // socket.join('public')
-        io.emit('login', {
+        socket.join('public')
+        io.emit('join', {
           ...data,
+          message: `${data.user.name} 進入聊天室`,
           type: 'announce'
         })
         // io.emit('loginStatus', `${data.user.name}已經加入了`)
@@ -57,17 +58,22 @@ module.exports = (Server, httpServer) => {
     })
 
     // 離開特定頻道(public or private)
-    // socket.on('leaveRoom', (data) => {
-    //   if (data.roomName === 'public') {
-    //     console.log(`${currentUser.name} has left public Room`)
-    //     socket.leave('public')
-    //   } else {
-    //     const userId = Number(data.id)
-    //     const roomName = createRoomName(userId, currentUser.id)
-    //     console.log(`${currentUser.name} has left ${roomName} Room`)
-    //     socket.join(roomName)
-    //   }
-    // })
+    socket.on('leaveRoom', (data) => {
+      if (data.roomName === 'public') {
+        socket.leave('public')
+        io.emit('leave', {
+          ...data,
+          message: `${data.user.name} 離開聊天室`,
+          type: 'announce'
+        })
+      } 
+      // else {
+      //   const userId = Number(data.id)
+      //   const roomName = createRoomName(userId, currentUser.id)
+      //   console.log(`${currentUser.name} has left ${roomName} Room`)
+      //   socket.join(roomName)
+      // }
+    })
 
     // 傳送訊息
     socket.on('sendMessage', async (data) => {
