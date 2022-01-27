@@ -17,6 +17,11 @@ const messageController = {
     messageService.getPrivateMessage(req, res, (data) => {
       return res.json(data)
     })
+  },
+  getMessagedUsers: (req, res) => {
+    messageService.getMessagedUsers(req, res, (data) => {
+      return res.json(data)
+    })
   }
 }
 

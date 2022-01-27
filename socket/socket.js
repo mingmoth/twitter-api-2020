@@ -117,12 +117,12 @@ module.exports = (Server, httpServer) => {
     })
 
     // 使用者離線
-    socket.on('disconnect', async () => {
-      console.log('The user disconnected')
-      const index = userList.findIndex(user => user.id === currentUser.id)
-      userList.splice(index, 1)
-      io.emit('loginStatus', `${currentUser.name}已經離開了`)
-      io.emit('loginUser', userList)
-    })
+    // socket.on('disconnect', async () => {
+    //   console.log('The user disconnected')
+    //   const index = userList.findIndex(user => user.id === currentUser.id)
+    //   userList.splice(index, 1)
+    //   io.emit('loginStatus', `${currentUser.name}已經離開了`)
+    //   io.emit('loginUser', userList)
+    // })
   })
 }

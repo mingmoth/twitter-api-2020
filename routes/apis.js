@@ -60,7 +60,11 @@ router.post('/messages', authenticated, messageController.postMessage)
 
 router.get('/messages/public', authenticated, messageController.getPublicMessage)
 
+router.get('/messages/message', authenticated, messageController.getMessagedUsers)
+
 router.get('/messages/:roomName', authenticated, messageController.getPrivateMessage)
+
+
 
 // reply
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.createReply)

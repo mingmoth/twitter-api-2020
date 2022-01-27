@@ -35,16 +35,24 @@ const messageService = {
     }
   },
 
-  getMessagedUser: async (req, res, callback) => {
-    const currentId = helper.getUser(req).id
+  getMessagedUsers: async (req, res, callback) => {
+    const currentUserId = helper.getUser(req).id
+    const lastestText = []
     try {
-      await Message.findAll({
+      const messages = await Message.findAll({
+        raw: true,
+        nest: true,
         where: {
-          roomName: { [Op.or]: [{ [Op.like]: `${currentId}-%` }, { [Op.like]: `%-${currentId}` }] }
-        }
-      }).then(messages => {
-        return callback({ status: 'success', message: '成功取得對話紀錄', messages: messages})
+          roomName: {
+            [Op.or]: [{ [Op.like]: `%-${currentUserId}` }, { [Op.like]: `${currentUserId}-%` }]
+          }
+        },
+        attributes: ['roomName'],
+        order: [['createdAt', 'DESC']],
+        group: ['roomName'],
       })
+      console.log(messages)
+      return callback({ status: 'success', message: '成功取得私訊紀錄', messages: messages })
     } catch (error) {
       return callback({ status: 'error', message: '無法取得私訊紀錄，請稍後再試'})
     }
