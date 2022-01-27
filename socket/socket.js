@@ -44,19 +44,23 @@ module.exports = (Server, httpServer) => {
         })
         io.emit('onlineUser', userList)
       }
-      // else {
-      //   socket.leaveAll()
-      //   const userId = Number(data.id) // 其他使用者id
-      //   const roomName = createRoomName(userId, currentUser.id)
-      //   socket.join(roomName)
-      //   console.log(`${currentUser.name} has join ${roomName} Room`)
+      else {
+        console.log(data)
+        socket.leaveAll()
+        socket.join(data.roomName)
+        console.log(data.roomName)
+        io.to(data.roomName).emit('join',{
+          ...data,
+          message: `${data.user.name} has join ${data.roomName} Room`,
+          type: 'announce'
+        })
 
-      //   // 移除特定頻道的未讀
-      //   await changeToRead(roomName, currentUser.id)
-      //   const notRead = await getNotRead(currentUser.id)
-      //   console.log('join', notRead)
-      //   socket.emit('messageNotRead', notRead)
-      // }
+        // 移除特定頻道的未讀
+        // await changeToRead(roomName, currentUser.id)
+        // const notRead = await getNotRead(currentUser.id)
+        // console.log('join', notRead)
+        // socket.emit('messageNotRead', notRead)
+      }
     })
 
     // 離開特定頻道(public or private)
@@ -83,16 +87,15 @@ module.exports = (Server, httpServer) => {
 
     // 傳送訊息
     socket.on('sendMessage', async (data) => {
-      console.log(data.message)
+      console.log(data.roomName)
       // 輸入空白訊息，不動作
       if (data.message.trim() === '') {
         return
       }
-      io.emit('newMessage', {
+      io.to(data.roomName).emit('newMessage', {
         ...data,
         type: 'message'
       })
-
       // 根據公開頻道或是私人頻道做相應處理
       // if (data.roomName === 'public') {
       //   const message = await postMessage(data, currentUser.id)
