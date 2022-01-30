@@ -1,5 +1,6 @@
 const helper = require('../_helpers')
-const { Op } = require("sequelize");
+const sequelaize = require("sequelize");
+const { Op } = sequelaize
 const db = require('../models')
 const { Message, User } = db
 
@@ -37,7 +38,8 @@ const messageService = {
 
   getMessagedUsers: async (req, res, callback) => {
     const currentUserId = helper.getUser(req).id
-    const lastestText = []
+    const latestMessages = []
+    const latestUsers = []
     try {
       const messages = await Message.findAll({
         raw: true,
@@ -45,14 +47,36 @@ const messageService = {
         where: {
           roomName: {
             [Op.or]: [{ [Op.like]: `%-${currentUserId}` }, { [Op.like]: `${currentUserId}-%` }]
-          }
+          }, 
         },
         attributes: ['roomName'],
         order: [['createdAt', 'DESC']],
-        group: ['roomName'],
+        group: ['roomName']
       })
       console.log(messages)
-      return callback({ status: 'success', message: '成功取得私訊紀錄', messages: messages })
+      for( message of messages) {
+        try {
+          const latest = await Message.findOne({
+            where: message,
+            order: [['createdAt', 'DESC']],
+          })
+          latestMessages.push(latest)
+        } catch (error) {
+          console.log(error)
+        }
+      }
+      for( message of messages) {
+        try {
+          const userId = helper.getMessagedUser(message.roomName, currentUserId)
+          const user = await User.findByPk(userId, {
+            attributes: { exclude: ['password']}
+          })
+          latestUsers.push(user)
+        } catch (error) {
+          console.log(error)
+        }
+      }
+      return callback({ status: 'success', message: '成功取得私訊紀錄', messages: latestMessages, users: latestUsers })
     } catch (error) {
       return callback({ status: 'error', message: '無法取得私訊紀錄，請稍後再試'})
     }

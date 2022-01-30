@@ -12,8 +12,15 @@ function createPrivateRoom(a, b) {
   return array
 }
 
+function getMessagedUser(a, b) {
+  let array = a.split('-')
+  array.splice(array.indexOf(String(b)), 1)
+  return (Number(array))
+}
+
 module.exports = {
   ensureAuthenticated,
   getUser,
-  createPrivateRoom
+  createPrivateRoom,
+  getMessagedUser
 };
