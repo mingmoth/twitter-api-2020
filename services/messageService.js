@@ -53,7 +53,6 @@ const messageService = {
         order: [['createdAt', 'DESC']],
         group: ['roomName']
       })
-      console.log(messages)
       for( message of messages) {
         try {
           const latest = await Message.findOne({
@@ -81,7 +80,40 @@ const messageService = {
       return callback({ status: 'error', message: '無法取得私訊紀錄，請稍後再試'})
     }
   },
-
+  getUnreadMessage: async (req, res, callback) => {
+    try {
+      const userId = helper.getUser(req).id
+      const messages = await Message.findAll({
+        where: {
+          roomName: {
+            [Op.or]: [{ [Op.like]: `${userId}-%`}, {[Op.like]: `%-${userId}`}]
+          },
+          isRead: 0
+        }
+      })
+      return callback({ status: 'success', message: '成功取得未讀訊息', messages: messages})
+    } catch (error) {
+      return callback({ status: 'error', message: '無法取得未讀訊息，請稍後再試' })
+    }
+  },
+  toggelUnreadMessage: async(req, res, callback) => {
+    try {
+      const roomName = req.params.roomName
+      console.log('roomName: ', roomName)
+      const messages = await Message.findAll({
+        where: { roomName: req.params.roomName },
+      })
+      for(message of messages) {
+        await message.update({
+          isRead: 1
+        })
+      }
+      return callback({ status: 'success', message: '成功已讀訊息', messages: messages })
+    } catch (error) {
+      console.log(error)
+      return callback({ status: 'error', message: '無法標記未讀訊息，請稍後再試' })
+    }
+  },
   getPrivateMessage: async (req, res, callback) => {
     try {
       console.log(req.params.roomName)

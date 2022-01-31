@@ -62,9 +62,11 @@ router.get('/messages/public', authenticated, messageController.getPublicMessage
 
 router.get('/messages/message', authenticated, messageController.getMessagedUsers)
 
+router.get('/messages/unread', authenticated, messageController.getUnreadMessage)
+
+router.put('/messages/unread/:roomName', authenticated, messageController.toggelUnreadMessage)
+
 router.get('/messages/:roomName', authenticated, messageController.getPrivateMessage)
-
-
 
 // reply
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.createReply)
