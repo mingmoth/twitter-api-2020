@@ -26,7 +26,6 @@ module.exports = (Server, httpServer) => {
     // 未讀私人訊息
     socket.on('getUnreadMessage', async (currentUserId) => {
       const unreadMessage = await messageService.getUnreadMessageS(currentUserId)
-      console.log('initUnread')
       socket.emit('unreadMessage', unreadMessage)
     })
 
@@ -37,7 +36,6 @@ module.exports = (Server, httpServer) => {
           userList = userList.concat(data.user)
         }
         socket.join('public')
-        console.log(data.user.id)
         io.emit('join', {
           ...data,
           message: `${data.user.name} 進入聊天室`,
@@ -46,10 +44,8 @@ module.exports = (Server, httpServer) => {
         io.emit('onlineUser', userList)
       }
       else {
-        console.log(data)
         socket.leaveAll()
         socket.join(data.roomName)
-        console.log(data.roomName)
         io.to(data.roomName).emit('join',{
           ...data,
           message: `${data.user.name} has join ${data.roomName} Room`,
@@ -67,7 +63,6 @@ module.exports = (Server, httpServer) => {
     // 離開特定頻道(public or private)
     socket.on('leaveRoom', (data) => {
       if (data.roomName === 'public') {
-        console.log(data.user.id)
         userList = userList.filter(userlist => userlist.id !== data.user.id)
         socket.leave('public')
         io.emit('leave', {
@@ -82,7 +77,6 @@ module.exports = (Server, httpServer) => {
 
     // 傳送訊息
     socket.on('sendMessage', async (data) => {
-      console.log(data.roomName)
       // 輸入空白訊息，不動作
       if (data.message.trim() === '') {
         return
