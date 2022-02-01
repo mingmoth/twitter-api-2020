@@ -96,6 +96,23 @@ const messageService = {
       return callback({ status: 'error', message: '無法取得未讀訊息，請稍後再試' })
     }
   },
+  // socket getUnreadMessage
+  getUnreadMessageS: async(currentUserId) => {
+    try {
+      const unreadMessage = await Message.findAll({
+        where: {
+          roomName: {
+            [Op.or]: [{ [Op.like]: `%-${currentUserId}` }, { [Op.like]: `${currentUserId}-%` }]
+          },
+          isRead: 0,
+          UserId: {[Op.not]: currentUserId}
+        }
+      })
+      return unreadMessage
+    } catch (error) {
+      console.log(error)
+    }
+  },
   toggelUnreadMessage: async(req, res, callback) => {
     try {
       const roomName = req.params.roomName

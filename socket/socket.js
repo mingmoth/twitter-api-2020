@@ -1,4 +1,5 @@
 const { socketAuth } = require('../middleware/auth')
+const messageService = require('../services/messageService')
 
 module.exports = (Server, httpServer) => {
   const io = new Server(httpServer, {
@@ -23,11 +24,11 @@ module.exports = (Server, httpServer) => {
     // console.log(userList)
 
     // 未讀私人訊息
-    // socket.on('messageNotReadInit', async () => {
-    //   const notRead = await getNotRead(currentUser.id)
-    //   console.log('init', notRead)
-    //   socket.emit('messageNotRead', notRead)
-    // })
+    socket.on('getUnreadMessage', async (currentUserId) => {
+      const unreadMessage = await messageService.getUnreadMessageS(currentUserId)
+      console.log('initUnread')
+      socket.emit('unreadMessage', unreadMessage)
+    })
 
     // 加入特定頻道(public or private)
     socket.on('joinRoom', async (data) => {
@@ -77,12 +78,6 @@ module.exports = (Server, httpServer) => {
         io.emit('onlineUser', userList)
         return userList
       }
-      // else {
-      //   const userId = Number(data.id)
-      //   const roomName = createRoomName(userId, currentUser.id)
-      //   console.log(`${currentUser.name} has left ${roomName} Room`)
-      //   socket.join(roomName)
-      // }
     })
 
     // 傳送訊息
@@ -96,6 +91,7 @@ module.exports = (Server, httpServer) => {
         ...data,
         type: 'message'
       })
+      socket.broadcast.emit('privateMessage')
       // 根據公開頻道或是私人頻道做相應處理
       // if (data.roomName === 'public') {
       //   const message = await postMessage(data, currentUser.id)
