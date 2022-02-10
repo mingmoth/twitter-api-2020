@@ -11,17 +11,16 @@ module.exports = (Server, httpServer) => {
   })
   let userList = []
 
-  io.on('connection', (socket) => {
-    console.log('connecttttttttttttttttttttttt')
+  io.use(socketAuth).on('connection', (socket) => {
+    console.log('user connect')
     // 取得當前使用者資訊
-    // const currentUser = socket.user
+    const currentUser = socket.user
     
     // 取得上線者資料
-    // const checkUser = userList.find(user => user.id === currentUser.id)
-    // if (!checkUser) {
-    //   userList.push(socket.user)
-    // }
-    // console.log(userList)
+    const checkUser = userList.find(user => user.id === currentUser.id)
+    if (!checkUser) {
+      userList.push(socket.user)
+    }
 
     // 未讀私人訊息
     socket.on('getUnreadMessage', async (currentUserId) => {
@@ -30,25 +29,22 @@ module.exports = (Server, httpServer) => {
     })
 
     // 加入特定頻道(public or private)
-    socket.on('joinRoom', async (data) => {
+    socket.on('join', async (data) => {
       if (data.roomName === 'public') {
-        if (!userList.map(userlist => userlist.id).includes(data.user.id)) {
-          userList = userList.concat(data.user)
-        }
         socket.join('public')
         io.emit('join', {
-          ...data,
-          message: `${data.user.name} 進入聊天室`,
+          roomName: 'public',
+          message: `${currentUser.name} 進入聊天室`,
           type: 'announce'
         })
-        io.emit('onlineUser', userList)
+        io.emit('publicUser', userList)
       }
       else {
         socket.leaveAll()
         socket.join(data.roomName)
         io.to(data.roomName).emit('join',{
           ...data,
-          message: `${data.user.name} has join ${data.roomName} Room`,
+          message: `join ${data.roomName} Room`,
           type: 'announce'
         })
 
@@ -61,16 +57,15 @@ module.exports = (Server, httpServer) => {
     })
 
     // 離開特定頻道(public or private)
-    socket.on('leaveRoom', (data) => {
+    socket.on('leave', (data) => {
       if (data.roomName === 'public') {
-        userList = userList.filter(userlist => userlist.id !== data.user.id)
         socket.leave('public')
         io.emit('leave', {
-          ...data,
-          message: `${data.user.name} 離開聊天室`,
+          roomName: 'public',
+          message: `${currentUser.name} 離開聊天室`,
           type: 'announce'
         })
-        io.emit('onlineUser', userList)
+        io.emit('publicUser', userList)
         return userList
       }
     })
@@ -81,11 +76,16 @@ module.exports = (Server, httpServer) => {
       if (data.message.trim() === '') {
         return
       }
-      io.to(data.roomName).emit('newMessage', {
-        ...data,
-        type: 'message'
-      })
-      socket.broadcast.emit('privateMessage')
+      if(data.roomName === 'public') {
+        console.log(data.roomName)
+        io.to('public').emit('newMessage', data)
+      } else {
+        console.log(data.roomName)
+        console.log('privateeeeeeeeeeeeee')
+        io.to(data.roomName).emit('newMessage', data)
+        socket.broadcast.emit('privateMessage')
+      }
+      
       // 根據公開頻道或是私人頻道做相應處理
       // if (data.roomName === 'public') {
       //   const message = await postMessage(data, currentUser.id)
@@ -107,12 +107,12 @@ module.exports = (Server, httpServer) => {
     })
 
     // 使用者離線
-    // socket.on('disconnect', async () => {
-    //   console.log('The user disconnected')
-    //   const index = userList.findIndex(user => user.id === currentUser.id)
-    //   userList.splice(index, 1)
-    //   io.emit('loginStatus', `${currentUser.name}已經離開了`)
-    //   io.emit('loginUser', userList)
-    // })
+    socket.on('disconnect', async () => {
+      console.log('The user disconnected')
+      const index = userList.findIndex(user => user.id === currentUser.id)
+      userList.splice(index, 1)
+      io.emit('offlineUser', `${currentUser.name}已經離開了`)
+      io.emit('publicUser', userList)
+    })
   })
 }

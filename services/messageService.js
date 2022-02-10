@@ -105,7 +105,7 @@ const messageService = {
             [Op.or]: [{ [Op.like]: `%-${currentUserId}` }, { [Op.like]: `${currentUserId}-%` }]
           },
           isRead: 0,
-          UserId: {[Op.not]: currentUserId}
+          UserId: { [Op.not]: currentUserId }
         }
       })
       return unreadMessage
