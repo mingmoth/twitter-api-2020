@@ -9,6 +9,7 @@ const tweetController = require('../controllers/api/tweetController')
 const replyController = require('../controllers/api/replyController')
 const adminController = require('../controllers/api/adminController')
 const messageController = require('../controllers/api/messageController')
+const noticeController = require('../controllers/api/noticeController')
 
 const authenticated = passport.authenticate('jwt', { session: false })
 
@@ -54,6 +55,9 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.createTweet)
 
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
+
+// notice
+router.get('/notices', authenticated, noticeController.getNotices)
 
 // message
 router.post('/messages', authenticated, messageController.postMessage)

@@ -1,9 +1,6 @@
 const helper = require('../_helpers')
 const db = require('../models')
-const Tweet = db.Tweet
-const User = db.User
-const Reply = db.Reply
-const Like = db.Like
+const { User, Tweet, Reply, Like, Notice } = db
 
 const tweetService = {
   // get all tweets
@@ -41,14 +38,27 @@ const tweetService = {
   createTweet: async (req, res, callback) => {
     if (!req.body.description) return callback({status: 'error', message: '請輸入推文內容'})
     if(req.body.description.length > 140) return callback({status: 'error', message: '推文字數需小於140單位'})
+    let currentUserId = Number(helper.getUser(req).id)
     try {
-      await Tweet.create({
+      const tweet = await Tweet.create({
         description: req.body.description,
         UserId: helper.getUser(req).id,
-      }).then(tweet => {
-        return callback({status: 'success', message: '成功新增推文', tweet: tweet})
       })
+      const followers = await User.findByPk(helper.getUser(req).id, {
+        include: [{ model: User, as: 'Followers' }]
+      })
+      for(user of followers.Followers) {
+        let roomName = helper.createPrivateRoom(Number(user.id), currentUserId)
+        await Notice.create({
+          roomName: roomName,
+          isRead: false,
+          TweetId: tweet.id,
+          UserId: user.id,
+        })
+      }
+      return callback({ status: 'success', message: '成功新增推文', tweet: tweet })
     } catch (error) {
+      console.log(error)
       return callback({ status: 'error', message: '無法新增推文，請稍後再試' })
     }
   }

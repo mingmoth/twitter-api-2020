@@ -8,8 +8,8 @@ function getUser(req) {
 
 function createPrivateRoom(a, b) {
   let array = [a, b]
-  array.sort(a, b => (a-b))
-  return array
+  array.sort((a, b) => a-b)
+  return array.join('-').toString()
 }
 
 function getMessagedUser(a, b) {
