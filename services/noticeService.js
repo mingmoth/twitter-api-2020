@@ -11,7 +11,11 @@ const noticeService = {
           UserId: helper.getUser(req).id,
           isRead: 0
         },
-        include: [{ model: Tweet, include: User }, Reply, Like ],
+        include: [
+          { model: Tweet, include: User }, 
+          { model: Reply }, 
+          { model: Like, include: [User, {model: Tweet, include: [User] }] } 
+        ],
         order: [['createdAt', 'DESC']],
       }).then(notices => {
         return callback({ status: 'success', message: '成功取得使用者通知', notices: notices })

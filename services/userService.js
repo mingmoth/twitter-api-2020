@@ -4,11 +4,7 @@ const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const helper = require('../_helpers')
 const db = require('../models')
-const User = db.User
-const Tweet = db.Tweet
-const Reply = db.Reply
-const Like = db.Like
-const Followship = db.Followship
+const { User, Tweet, Reply, Like, Followship, Notice } = db
 
 const userService = {
   signUp: async (req, res, callback) => {
@@ -245,19 +241,35 @@ const userService = {
     }
   },
   // like one tweet
-  addLike: (req, res, callback) => {
-    Like.findOne({ where: { TweetId: req.params.id, UserId: helper.getUser(req).id } }).then(like => {
-      if (like) {
+  addLike: async (req, res, callback) => {
+    try {
+      let currentUserId = Number(helper.getUser(req).id)
+      let like = Like.findOne({ where: { TweetId: req.params.id, UserId: currentUserId } })
+      if(!like) {
         return callback({ status: 'error', message: '此篇推文已按讚' })
-      } else {
-        Like.create({
-          TweetId: req.params.id,
-          UserId: helper.getUser(req).id
-        }).then(like => {
-          return callback({ status: 'success', message: '成功對推文按讚', like: like })
+      }
+      like = await Like.create({
+        TweetId: req.params.id,
+        UserId: helper.getUser(req).id
+      })
+      const followers = await User.findByPk(helper.getUser(req).id, {
+        include: [{ model: User, as: 'Followers' }]
+      })
+      
+      for (user of followers.Followers) {
+        let roomName = helper.createPrivateRoom(Number(user.id), currentUserId)
+        await Notice.create({
+          roomName: roomName,
+          isRead: false,
+          LikeId: like.id,
+          UserId: user.id,
         })
       }
-    })
+      return callback({ status: 'success', message: '成功對推文按讚', like: like })
+    } catch (error) {
+      console.log(error)
+      return callback({ status: 'error', message: '無法對此篇推文按讚' })
+    }
   },
   // cancel like from tweet
   removeLike: (req, res, callback) => {
