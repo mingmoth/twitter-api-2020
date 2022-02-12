@@ -255,7 +255,6 @@ const userService = {
       const followers = await User.findByPk(helper.getUser(req).id, {
         include: [{ model: User, as: 'Followers' }]
       })
-      
       for (user of followers.Followers) {
         let roomName = helper.createPrivateRoom(Number(user.id), currentUserId)
         await Notice.create({

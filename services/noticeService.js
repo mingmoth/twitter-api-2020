@@ -13,7 +13,7 @@ const noticeService = {
         },
         include: [
           { model: Tweet, include: User }, 
-          { model: Reply }, 
+          { model: Reply, include: [User, { model: Tweet, include: [User] }] }, 
           { model: Like, include: [User, {model: Tweet, include: [User] }] } 
         ],
         order: [['createdAt', 'DESC']],
