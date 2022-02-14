@@ -116,7 +116,8 @@ const userService = {
   getUserLike: (req, res, callback) => {
     Like.findAll({
       where: { UserId: req.params.id },
-      include: [{ model: Tweet, include: [User, Reply, Like] }]
+      include: [{ model: Tweet, include: [User, Reply, Like] }],
+      order: [['createdAt', 'DESC']],
     }).then(likes => {
       likes = likes.map(like => {
         return like = {
@@ -253,13 +254,15 @@ const userService = {
         UserId: helper.getUser(req).id
       })
       const tweet = await Tweet.findByPk(like.TweetId)
-      let room = helper.createPrivateRoom(Number(tweet.UserId), currentUserId)
-      await Notice.create({
-        roomName: room,
-        isRead: false,
-        LikeId: like.id,
-        UserId: tweet.UserId,
-      })
+      if (currentUserId !== tweet.UserId) {
+        let room = helper.createPrivateRoom(Number(tweet.UserId), currentUserId)
+        await Notice.create({
+          roomName: room,
+          isRead: false,
+          LikeId: like.id,
+          UserId: tweet.UserId,
+        })
+      }
       const followers = await User.findByPk(helper.getUser(req).id, {
         include: [{ model: User, as: 'Followers' }]
       })

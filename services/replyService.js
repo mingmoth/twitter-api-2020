@@ -15,13 +15,15 @@ const replyService = {
       })
       let currentUserId = Number(helper.getUser(req).id)
       const tweet = await Tweet.findByPk(reply.TweetId)
-      let room = helper.createPrivateRoom(Number(tweet.UserId), currentUserId)
-      await Notice.create({
-        roomName: room,
-        isRead: false,
-        ReplyId: reply.id,
-        UserId: tweet.UserId,
-      })
+      if (currentUserId !== tweet.UserId) {
+        let room = helper.createPrivateRoom(Number(tweet.UserId), currentUserId)
+        await Notice.create({
+          roomName: room,
+          isRead: false,
+          ReplyId: reply.id,
+          UserId: tweet.UserId,
+        })
+      }
       const followers = await User.findByPk(helper.getUser(req).id, {
         include: [{ model: User, as: 'Followers' }]
       })

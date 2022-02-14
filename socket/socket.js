@@ -1,5 +1,6 @@
 const { socketAuth } = require('../middleware/auth')
 const messageService = require('../services/messageService')
+const helper = require('../_helpers')
 
 module.exports = (Server, httpServer) => {
   const io = new Server(httpServer, {
@@ -26,6 +27,11 @@ module.exports = (Server, httpServer) => {
     socket.on('getUnreadMessage', async (currentUserId) => {
       const unreadMessage = await messageService.getUnreadMessageS(currentUserId)
       socket.emit('unreadMessage', unreadMessage)
+    })
+
+    // 未讀通知
+    socket.on('sendNotice', () => {
+      socket.broadcast.emit('getUnreadNotice')
     })
 
     // 加入特定頻道(public or private)
