@@ -59,6 +59,10 @@ router.get('/tweets/:id', authenticated, tweetController.getTweet)
 // notice
 router.get('/notices', authenticated, noticeController.getNotices)
 
+router.get('/notices/unread', authenticated, noticeController.getUnreadNotices)
+
+router.put('/notices/unread', authenticated, noticeController.toggleNotices)
+
 // message
 router.post('/messages', authenticated, messageController.postMessage)
 

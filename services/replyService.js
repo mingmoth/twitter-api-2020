@@ -1,5 +1,6 @@
 const helper = require('../_helpers')
 const db = require('../models')
+const noticeService = require('./noticeService')
 const { User, Tweet, Reply, Like, Followship, Notice } = db
 
 const replyService = {
@@ -12,18 +13,27 @@ const replyService = {
         UserId: helper.getUser(req).id,
         TweetId: req.params.tweet_id
       })
-      console.log(reply.id, reply.comment)
       let currentUserId = Number(helper.getUser(req).id)
+      const tweet = await Tweet.findByPk(reply.TweetId)
+      let room = helper.createPrivateRoom(Number(tweet.UserId), currentUserId)
+      await Notice.create({
+        roomName: room,
+        isRead: false,
+        ReplyId: reply.id,
+        UserId: tweet.UserId,
+      })
       const followers = await User.findByPk(helper.getUser(req).id, {
         include: [{ model: User, as: 'Followers' }]
       })
       for (user of followers.Followers) {
         let roomName = helper.createPrivateRoom(Number(user.id), currentUserId)
-        await Notice.create({
-          roomName: roomName,
-          isRead: false,
-          ReplyId: reply.id,
-          UserId: user.id,
+        await Notice.findOrCreate({
+          where: {
+            roomName: roomName,
+            isRead: false,
+            ReplyId: reply.id,
+            UserId: user.id,
+          }
         })
       }
       return callback({ status: 'success', message: '成功新增推文回覆', reply: reply })

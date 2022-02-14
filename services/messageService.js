@@ -125,7 +125,7 @@ const messageService = {
           isRead: 1
         })
       }
-      return callback({ status: 'success', message: '成功已讀訊息', messages: messages })
+      return callback({ status: 'success', message: '成功已讀訊息' })
     } catch (error) {
       console.log(error)
       return callback({ status: 'error', message: '無法標記未讀訊息，請稍後再試' })

@@ -252,16 +252,26 @@ const userService = {
         TweetId: req.params.id,
         UserId: helper.getUser(req).id
       })
+      const tweet = await Tweet.findByPk(like.TweetId)
+      let room = helper.createPrivateRoom(Number(tweet.UserId), currentUserId)
+      await Notice.create({
+        roomName: room,
+        isRead: false,
+        LikeId: like.id,
+        UserId: tweet.UserId,
+      })
       const followers = await User.findByPk(helper.getUser(req).id, {
         include: [{ model: User, as: 'Followers' }]
       })
       for (user of followers.Followers) {
         let roomName = helper.createPrivateRoom(Number(user.id), currentUserId)
-        await Notice.create({
-          roomName: roomName,
-          isRead: false,
-          LikeId: like.id,
-          UserId: user.id,
+        await Notice.findOrCreate({
+          where: {
+            roomName: roomName,
+            isRead: false,
+            LikeId: like.id,
+            UserId: user.id,
+          }
         })
       }
       return callback({ status: 'success', message: '成功對推文按讚', like: like })
