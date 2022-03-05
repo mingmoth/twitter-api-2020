@@ -27,11 +27,11 @@ router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
 
 // facebook signin
-router.get('/auth/facebook', passport.authenticate('facebook', {
-  scope: ['email', 'public_profile']
-}))
+// router.get('/auth/facebook', passport.authenticate('facebook', {
+//   scope: ['email', 'public_profile']
+// }))
 
-router.get('/auth/facebook/callback', passport.authenticate('facebook', { session: false }), userController.loginByFacebook)
+// router.get('/auth/facebook/callback', passport.authenticate('facebook', { session: false }), userController.loginByFacebook)
 
 // user
 router.get('/currentUser', authenticated, userController.getCurrentUser)
