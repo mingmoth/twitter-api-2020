@@ -53,12 +53,6 @@ module.exports = (Server, httpServer) => {
           message: `join ${data.roomName} Room`,
           type: 'announce'
         })
-
-        // 移除特定頻道的未讀
-        // await changeToRead(roomName, currentUser.id)
-        // const notRead = await getNotRead(currentUser.id)
-        // console.log('join', notRead)
-        // socket.emit('messageNotRead', notRead)
       }
     })
 
@@ -83,33 +77,13 @@ module.exports = (Server, httpServer) => {
         return
       }
       if(data.roomName === 'public') {
-        console.log(data.roomName)
         io.to('public').emit('newMessage', data)
       } else {
         console.log(data.roomName)
-        console.log('privateeeeeeeeeeeeee')
         io.to(data.roomName).emit('newMessage', data)
         socket.broadcast.emit('privateMessage')
       }
       
-      // 根據公開頻道或是私人頻道做相應處理
-      // if (data.roomName === 'public') {
-      //   const message = await postMessage(data, currentUser.id)
-      //   message.avatar = currentUser.avatar
-      //   io.to(data.roomName).emit('message', data.message)
-      // } 
-      // else {
-      //   const userId = Number(data.id) // 其他使用者id
-      //   if (userId === -1) {
-      //     return
-      //   }
-      //   const roomName = createRoomName(userId, currentUser.id)
-      //   data.roomName = roomName
-      //   const message = await postMessage(data, currentUser.id)
-      //   message.avatar = currentUser.avatar
-      //   io.to(message.roomName).emit('message', message)
-      //   socket.broadcast.emit('privateMessage')
-      // }
     })
 
     // 使用者離線
