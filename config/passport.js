@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const passport = require('passport')
 // const FacebookStrategy = require('passport-facebook').Strategy
-const bcrypt = require('bcryptjs')
+// const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
 
