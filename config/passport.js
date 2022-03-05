@@ -16,7 +16,7 @@ let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
 jwtOptions.secretOrKey = process.env.JWT_SECRET
 
-let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
+passport.use(new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id,
     {
       include: [
@@ -31,8 +31,7 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
     if (!user) return next(null, false)
     return next(null, user)
   })
-})
-passport.use(strategy)
+}))
 
 // passport.use(new FacebookStrategy({
 //   clientID: process.env.FACEBOOK_APP_ID,
