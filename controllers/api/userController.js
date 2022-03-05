@@ -37,6 +37,21 @@ let userController = {
       return res.json(data)
     })
   },
+  // facebook login
+  loginByFacebook: (req, res) => {
+    const payload = { id: req.user.id }
+    const token = jwt.sign(payload, process.env.JWT_SECRET)
+    console.log(token)
+    req.user.password = undefined
+    return res.status(200).json({
+      status: 'success',
+      message: '登入成功',
+      token: token,
+      user: {
+        account: req.user.account, name: req.user.name, email: req.user.email, role: req.user.role, avatar: req.user.avatar,
+      }
+    })
+  },
   // get currentUser
   getCurrentUser: (req, res) => {
     userService.getCurrentUser(req, res, (data) => {
