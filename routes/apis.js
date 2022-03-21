@@ -3,7 +3,6 @@ const router = express.Router()
 const passport = require('../config/passport')
 const multer = require("multer");
 const upload = multer({ dest: "temp/" });
-// const jwt = require('jsonwebtoken')
 
 const userController = require('../controllers/api/userController')
 const tweetController = require('../controllers/api/tweetController')
@@ -25,13 +24,6 @@ const authenticatedAdmin = (req, res, next) => {
 
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
-
-// facebook signin
-// router.get('/auth/facebook', passport.authenticate('facebook', {
-//   scope: ['email', 'public_profile']
-// }))
-
-// router.get('/auth/facebook/callback', passport.authenticate('facebook', { session: false }), userController.loginByFacebook)
 
 // user
 router.get('/currentUser', authenticated, userController.getCurrentUser)
